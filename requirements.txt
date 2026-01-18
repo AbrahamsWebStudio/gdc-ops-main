@@ -1,0 +1,11 @@
+Django # Web framework
+djangorestframework # For building RESTful APIs
+python-dotenv # For environment variable management
+psycopg2-binary # PostgreSQL database adapter
+celery # For asynchronous task queue
+redis # Redis client for Python
+Pillow # For image handling
+django-cors-headers # For handling CORS (Cross-Origin Resource Sharing)
+pytest-django # For testing Django applications
+isort # For code formatting and import sorting
+black # For code formatting
