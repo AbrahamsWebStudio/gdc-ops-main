@@ -15,7 +15,8 @@ class AuditEvent(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
 
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
+                             blank=True)
     user_email = models.EmailField()
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.CharField(max_length=500, blank=True)
@@ -40,6 +41,14 @@ class AuditEvent(models.Model):
     def __str__(self) -> str:
         return f"{self.timestamp.strftime('%Y-%m-%d %H:%M')} - {self.event_type} by {self.user_email}"
 
+    def save(self, *args, **kwargs):
+        if self.pk and not self._state.adding:
+            raise ValueError("AuditEvent records are append-only.")
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValueError("AuditEvent records are append-only.")
+
     @classmethod
     def log(
         cls,
@@ -56,12 +65,16 @@ class AuditEvent(models.Model):
         ip = None
         user_agent = ""
         if request:
-            ip = request.META.get("REMOTE_ADDR")
+            forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR", "")
+            if forwarded_for:
+                ip = forwarded_for.split(",")[0].strip()
+            else:
+                ip = request.META.get("REMOTE_ADDR")
             user_agent = request.META.get("HTTP_USER_AGENT", "")[:500]
 
         return cls.objects.create(
             user=user,
-            user_email=user.email if user else "system",
+            user_email=getattr(user, "email", "") or "system",
             ip_address=ip,
             user_agent=user_agent,
             event_type=event_type,

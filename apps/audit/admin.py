@@ -9,6 +9,7 @@ class AuditEventAdmin(admin.ModelAdmin):
     list_filter = ["event_type", "action", "model_name", "timestamp"]
     search_fields = ["user_email", "object_id", "event_type"]
     readonly_fields = [field.name for field in AuditEvent._meta.fields]
+    actions = None
 
     def has_add_permission(self, request):
         return False

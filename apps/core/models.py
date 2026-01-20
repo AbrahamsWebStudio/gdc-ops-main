@@ -7,6 +7,26 @@ from django.db import models
 from django.utils import timezone
 
 
+class BaseModelQuerySet(models.QuerySet):
+    def alive(self):
+        return self.filter(is_deleted=False)
+
+    def deleted(self):
+        return self.filter(is_deleted=True)
+
+
+class ActiveObjectsManager(models.Manager):
+    """Manager that excludes soft-deleted records by default."""
+
+    def get_queryset(self):
+        return BaseModelQuerySet(self.model, using=self._db).alive()
+
+
+class AllObjectsManager(models.Manager):
+    def get_queryset(self):
+        return BaseModelQuerySet(self.model, using=self._db)
+
+
 class BaseModel(models.Model):
     """Base model for all GDC entities."""
 
@@ -15,24 +35,21 @@ class BaseModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
+    objects = ActiveObjectsManager()
+    all_objects = AllObjectsManager()
 
     class Meta:
         abstract = True
         ordering = ["-created_at"]
 
     def soft_delete(self) -> None:
-        self.is_deleted = True
-        self.deleted_at = timezone.now()
-        self.save()
+        if not self.is_deleted:
+            self.is_deleted = True
+            self.deleted_at = timezone.now()
+            self.save(update_fields=["is_deleted", "deleted_at", "updated_at"])
 
     def restore(self) -> None:
-        self.is_deleted = False
-        self.deleted_at = None
-        self.save()
-
-
-class ActiveObjectsManager(models.Manager):
-    """Manager that excludes soft-deleted records by default."""
-
-    def get_queryset(self):
-        return super().get_queryset().filter(is_deleted=False)
+        if self.is_deleted or self.deleted_at:
+            self.is_deleted = False
+            self.deleted_at = None
+            self.save(update_fields=["is_deleted", "deleted_at", "updated_at"])

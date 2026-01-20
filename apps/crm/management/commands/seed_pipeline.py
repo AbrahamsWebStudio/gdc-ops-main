@@ -4,9 +4,25 @@ from apps.crm.models import PipelineStage
 
 
 class Command(BaseCommand):
-    help = "Create default pipeline stages"
+    """
+    WHAT: Creates default pipeline stages
+    WHY: Can't add leads without stages
+    USAGE: python manage.py seed_pipeline
+    """
+
+    help = "Create default CRM pipeline stages"
 
     def handle(self, *args, **kwargs):
+        """
+        STAGES EXPLANATION:
+        - Cold: First contact, no response yet
+        - Warm: Responded positively, exploring
+        - Meeting Booked: Agreed to audit/demo
+        - Audit Done: Completed free process audit
+        - Proposal Sent: Sent pricing & scope
+        - Won - Client: Signed, paying client
+        - Lost: Rejected or went silent
+        """
         stages = [
             ("Cold", 0, False, False),
             ("Warm", 1, False, False),
@@ -18,10 +34,13 @@ class Command(BaseCommand):
         ]
 
         for name, order, is_won, is_lost in stages:
-            PipelineStage.objects.get_or_create(
+            stage, created = PipelineStage.objects.get_or_create(
                 name=name,
                 defaults={"order": order, "is_won": is_won, "is_lost": is_lost},
             )
-            self.stdout.write(f"Created stage: {name}")
+            if created:
+                self.stdout.write(self.style.SUCCESS(f"✅ Created stage: {name}"))
+            else:
+                self.stdout.write(f"ℹ️  Stage already exists: {name}")
 
-        self.stdout.write(self.style.SUCCESS("Pipeline stages seeded!"))
+        self.stdout.write(self.style.SUCCESS("\n🎉 Pipeline stages ready!"))
