@@ -2,5 +2,83 @@
 
 {% block content %}
 <h1>Founder Dashboard</h1>
-<p>Daily control center coming next.</p>
+
+<h2>Overdue Follow-ups</h2>
+{% if overdue_leads %}
+<ul>
+  {% for lead in overdue_leads %}
+  <li>{{ lead.business_name }} — due {{ lead.next_action_due|date:"M j, Y" }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No overdue follow-ups.</p>
+{% endif %}
+
+<h2>Stale Leads (7+ days)</h2>
+{% if stale_leads %}
+<ul>
+  {% for lead in stale_leads %}
+  <li>{{ lead.business_name }} — last touch {{ lead.last_interaction_date|date:"M j, Y" }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No stale leads.</p>
+{% endif %}
+
+<h2>Today’s Priorities</h2>
+{% if priorities %}
+<ul>
+  {% for lead in priorities %}
+  <li>{{ lead.business_name }} — {{ lead.stage.name }} — KES {{ lead.value_estimate }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No priorities yet.</p>
+{% endif %}
+
+<h2>Pipeline Counts</h2>
+{% if pipeline_counts %}
+<ul>
+  {% for row in pipeline_counts %}
+  <li>{{ row.stage__name }} — {{ row.total }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No pipeline data yet.</p>
+{% endif %}
+
+<h2>Next Actions</h2>
+{% if next_actions %}
+<ul>
+  {% for lead in next_actions %}
+  <li>{{ lead.business_name }} — {{ lead.next_action }} ({{ lead.next_action_due|date:"M j, Y" }})</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No next actions scheduled.</p>
+{% endif %}
+
+<h2>Consistency Metrics (Proof Layer)</h2>
+
+<h3>Speed-to-Lead (minutes)</h3>
+<p>Average time from lead creation to first interaction. Excludes leads with no interaction. Week = Mon–Sun; rolling = last 7 days.</p>
+<ul>
+  <li>Week: {{ consistency_metrics.speed_to_lead.week|default:"n/a" }}</li>
+  <li>Rolling 7 days: {{ consistency_metrics.speed_to_lead.rolling|default:"n/a" }}</li>
+</ul>
+
+<h3>Follow-up Completion Rate</h3>
+<p>Percent of due actions completed with at least one interaction on/after the due date, within the same window. Excludes leads with no due action.</p>
+<ul>
+  <li>Week: {{ consistency_metrics.follow_up_completion_rate.week.rate|default:"n/a" }}% ({{ consistency_metrics.follow_up_completion_rate.week.completed|default:"0" }}/{{ consistency_metrics.follow_up_completion_rate.week.due|default:"0" }})</li>
+  <li>Rolling 7 days: {{ consistency_metrics.follow_up_completion_rate.rolling.rate|default:"n/a" }}% ({{ consistency_metrics.follow_up_completion_rate.rolling.completed|default:"0" }}/{{ consistency_metrics.follow_up_completion_rate.rolling.due|default:"0" }})</li>
+</ul>
+
+<h3>Stage Movements</h3>
+<p>Count of lead stage changes logged in the window. Excludes non‑stage audit events.</p>
+<ul>
+  <li>Week: {{ consistency_metrics.stage_movements.week|default:"0" }}</li>
+  <li>Rolling 7 days: {{ consistency_metrics.stage_movements.rolling|default:"0" }}</li>
+</ul>
+
 {% endblock %}

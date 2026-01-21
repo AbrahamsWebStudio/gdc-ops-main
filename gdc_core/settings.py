@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "apps.identity",
     "apps.crm",
     "apps.dashboard",
+    "apps.automations.apps.AutomationsConfig",
 ]
 
 MIDDLEWARE = [
@@ -105,3 +106,10 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Automations
+GDC_AUTOMATIONS_ENABLED = os.getenv("GDC_AUTOMATIONS_ENABLED", "true").lower() == "true"
+GDC_WEBHOOK_BASE_URL = os.getenv("GDC_WEBHOOK_BASE_URL", "http://127.0.0.1:5678/webhook/")
+GDC_WEBHOOK_SECRET = os.getenv("GDC_WEBHOOK_SECRET", "")
+GDC_WEBHOOK_TIMEOUT = int(os.getenv("GDC_WEBHOOK_TIMEOUT", "10"))
+GDC_AUTOMATIONS_RETRY_MAX = int(os.getenv("GDC_AUTOMATIONS_RETRY_MAX", "3"))

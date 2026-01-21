@@ -18,3 +18,6 @@ python manage.py runserver
 ```bash
 python manage.py seed_pipeline
 ```
+
+## Workflow Discipline
+See `docs/workflow.md` for the daily rules that keep metrics accurate.
