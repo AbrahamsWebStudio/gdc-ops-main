@@ -14,9 +14,11 @@ class PipelineStageAdmin(admin.ModelAdmin):
 class LeadAdmin(admin.ModelAdmin):
     def overdue_indicator(self, obj):
         if obj.is_overdue:
-            return format_html('<span style="color: red;">{}</span>', "🔴 OVERDUE")
+            return format_html('<span style="color: red;">{}</span>',
+                               "🔴 OVERDUE")
         if obj.next_action_due:
-            return format_html('<span style="color: green;">{}</span>', "✅ Scheduled")
+            return format_html('<span style="color: green;">{}</span>',
+                               "✅ Scheduled")
         return "-"
 
     overdue_indicator.short_description = "Status"
@@ -24,7 +26,8 @@ class LeadAdmin(admin.ModelAdmin):
     def days_since_contact(self, obj):
         days = obj.days_since_last_interaction
         if days > 7:
-            return format_html(f'<span style="color: orange;">{days} days</span>')
+            return format_html(
+                '<span style="color: orange;">{} days</span>', days)
         return f"{days} days"
 
     days_since_contact.short_description = "Last Contact"
@@ -39,7 +42,12 @@ class LeadAdmin(admin.ModelAdmin):
         "next_action_due",
     ]
     list_filter = ["stage", "source", "industry", "created_at"]
-    search_fields = ["business_name", "contact_person", "phone", "email", "pain_point"]
+    search_fields = [
+        "business_name",
+        "contact_person",
+        "phone",
+        "email",
+        "pain_point"]
     readonly_fields = [
         "id",
         "created_at",
@@ -87,7 +95,10 @@ class LeadAdmin(admin.ModelAdmin):
     class InteractionInline(admin.TabularInline):
         model = Interaction
         extra = 1
-        fields = ["interaction_type", "summary", "outcome", "duration_minutes", "created_at"]
+        fields = ["interaction_type",
+                  "summary", "outcome",
+                  "duration_minutes",
+                  "created_at"]
         readonly_fields = ["created_at"]
 
     inlines = [InteractionInline]
@@ -95,7 +106,8 @@ class LeadAdmin(admin.ModelAdmin):
 
 @admin.register(Interaction)
 class InteractionAdmin(admin.ModelAdmin):
-    list_display = ["lead", "interaction_type", "created_at", "duration_minutes", "outcome"]
+    list_display = ["lead", "interaction_type", "created_at",
+                    "duration_minutes", "outcome"]
     list_filter = ["interaction_type", "created_at"]
     search_fields = ["lead__business_name", "summary", "outcome"]
     readonly_fields = ["created_at", "updated_at"]
@@ -103,7 +115,8 @@ class InteractionAdmin(admin.ModelAdmin):
     fieldsets = (
         (
             None,
-            {"fields": ("lead", "interaction_type", "summary", "outcome", "duration_minutes")},
+            {"fields": ("lead", "interaction_type",
+                        "summary", "outcome", "duration_minutes")},
         ),
         (
             "Timestamps",

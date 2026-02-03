@@ -53,3 +53,31 @@ class BaseModel(models.Model):
             self.is_deleted = False
             self.deleted_at = None
             self.save(update_fields=["is_deleted", "deleted_at", "updated_at"])
+
+
+class AppSetting(models.Model):
+    key = models.CharField(max_length=100, unique=True)
+    value = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["key"]
+
+    def __str__(self) -> str:
+        return f"{self.key}={self.value}"
+
+    @classmethod
+    def get_value(cls, key, default=None):
+        try:
+            return cls.objects.get(key=key).value
+        except cls.DoesNotExist:
+            return default
+
+    @classmethod
+    def get_int(cls, key, default=0):
+        value = cls.get_value(key, None)
+        try:
+            return int(value) if value is not None else default
+        except (TypeError, ValueError):
+            return default

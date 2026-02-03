@@ -19,5 +19,10 @@ python manage.py runserver
 python manage.py seed_pipeline
 ```
 
+## Login & Dashboard
+- Public landing page: `/`
+- Login: `/login/`
+- Dashboard (requires login): `/dashboard/`
+
 ## Workflow Discipline
 See `docs/workflow.md` for the daily rules that keep metrics accurate.
